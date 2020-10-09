@@ -1,0 +1,14 @@
+{
+  "name": "js-podcast",
+  "version": "1.0.0",
+  "description": "js podcast app",
+  "main": "src/app.js",
+  "author": "Pavel <p.dubitskiy@ya.ru>",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  }
+}
