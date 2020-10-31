@@ -1,6 +1,7 @@
 import { createModal, isValid } from './utils'
-import './static/style.css'
 import { Question } from './question'
+import { authWithEmailAndPassword, getAuthForm } from './auth'
+import './static/style.css'
 
 const form = document.getElementById('form')
 const input = form.querySelector('#question-input')
@@ -8,13 +9,13 @@ const modalBtn = document.getElementById('modal-btn')
 const submitBtn = form.querySelector('#submit')
 
 window.addEventListener('DOMContentLoaded', Question.renderList)
-modalBtn.addEventListener('click', openModal);
+modalBtn.addEventListener('click', openModal)
 form.addEventListener('submit', submitFormHandler)
 input.addEventListener('input', () => {
   submitBtn.disabled = !isValid(input.value)
 })
 
-function submitFormHandler (event) {
+function submitFormHandler(event) {
   event.preventDefault()
   if (isValid(input.value)) {
     const question = {
@@ -22,17 +23,42 @@ function submitFormHandler (event) {
       date: new Date().toJSON(),
     }
     // async request to server to save question
-    Question.create(question).then(() => {
-      submitBtn.disabled = true
-      console.log(question, ':question')
-      input.value = ''
-      input.className = ''
-      submitBtn.disabled = false
-    })
+    Question.create(question)
+            .then(() => {
+              submitBtn.disabled = true
+              input.value = ''
+              input.className = ''
+              submitBtn.disabled = false
+            })
   }
 }
 
-function openModal (e) {
-  e.preventDefault()
-  createModal('Авторизация', '<h1>Test</h1>')
+function openModal() {
+  createModal('Авторизация', getAuthForm())
+  document.getElementById('auth-form')
+          .addEventListener('submit', authFormHandler, {once: true})
+}
+
+function authFormHandler(event) {
+  event.preventDefault()
+  
+  const btn = event.target.querySelector('button')
+  const email = event.target.querySelector('#email').value
+  const password = event.target.querySelector('#password').value
+  
+  btn.disabled = true
+  authWithEmailAndPassword(email, password)
+    .then(Question.fetch)
+    .then(renderModalAfterAuth)
+    .then(() => {
+      btn.disabled = false
+    })
+}
+
+function renderModalAfterAuth(content) {
+  if (typeof content === 'string') {
+    createModal('Ошибка', content)
+  } else {
+    createModal('Список вопросов', Question.listToHTML(content))
+  }
 }
